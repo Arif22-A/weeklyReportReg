@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Report Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .date-range, .activity-row {
+            display: flex;
+            gap: 10px;
+        }
+        .date-range input, .activity-row input, .activity-row select {
+            flex: 1;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .image-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .image-row img {
+            max-width: 100px;
+            max-height: 100px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .image-row textarea {
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Weekly Report</h1>
+    <form id="weeklyReportForm">
+        <!-- Informasi Dasar -->
+        <label for="restaurantName">Restaurant Name</label>
+        <input type="text" id="restaurantName" name="restaurantName" placeholder="Enter restaurant name" required>
+
+        <label for="reportDate">Report Week</label>
+        <div class="date-range">
+            <input type="date" id="startDate" name="startDate" placeholder="Start date" required>
+            <input type="date" id="endDate" name="endDate" placeholder="End date" required>
+        </div>
+
+        <label for="reporterName">Reporter Name</label>
+        <input type="text" id="reporterName" name="reporterName" placeholder="Your name" required>
+
+        <!-- Data Penjualan -->
+        <label for="totalSales">Total Sales (IDR)</label>
+        <input type="text" id="totalSales" name="totalSales" placeholder="Enter total sales" required>
+
+        <label for="totalMarketlist">Total Marketlist (IDR)</label>
+        <input type="text" id="totalMarketlist" name="totalMarketlist" placeholder="Enter total marketlist" required>
+
+        <label for="costPercentage">% Cost</label>
+        <input type="text" id="costPercentage" name="costPercentage" placeholder="Cost percentage will be calculated automatically" readonly>
+
+                <!-- Dynamic Image Upload -->
+                <div id="imageContainer">
+                    <h3>Activity Images</h3>
+                </div>
+                <div>
+                    <button type="button" id="addImageRow">Add Image</button>
+                </div>
+        
+                <!-- Daily Activity Department -->
+                <div id="dailyActivityContainer">
+                    <h3>Daily Activity Department</h3>
+                    <div class="activity-row">
+                        <input type="date" name="activityDate" placeholder="Activity Date" required>
+                        <input type="text" name="activityDepartment" placeholder="Department" required>
+                        <input type="text" name="activityDescription" placeholder="Activity Description" required>
+                        <select name="activityStatus" required>
+                            <option value="">Select Status</option>
+                            <option value="Done">Done</option>
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <button type="button" id="addActivityRow">Add Activity</button>
+                </div>
+        
+                <!-- Catatan Tambahan -->
+                <label for="additionalNotes">Additional Notes</label>
+                <textarea id="additionalNotes" name="additionalNotes" rows="4" placeholder="Add any extra notes or observations"></textarea>
+        
+                <!-- Print Button -->
+                
+            </form>
+        
+            <script>
+                const totalSalesInput = document.getElementById('totalSales');
+                const totalMarketlistInput = document.getElementById('totalMarketlist');
+                const costPercentageInput = document.getElementById('costPercentage');
+                const addImageRowButton = document.getElementById('addImageRow');
+                const imageContainer = document.getElementById('imageContainer');
+                const printButton = document.getElementById('printButton');
+                const addActivityRowButton = document.getElementById('addActivityRow');
+                const dailyActivityContainer = document.getElementById('dailyActivityContainer');
+        
+                function formatNumber(value) {
+                    return value.replace(/\D/g, '')
+                                .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                }
+        
+                function parseNumber(value) {
+                    return parseFloat(value.replace(/\./g, '')) || 0;
+                }
+        
+                function calculateCostPercentage() {
+                    const totalSales = parseNumber(totalSalesInput.value);
+                    const totalMarketlist = parseNumber(totalMarketlistInput.value);
+        
+                    if (totalSales > 0) {
+                        const percentage = (totalMarketlist / totalSales) * 100;
+                        costPercentageInput.value = percentage.toFixed(2) + '%';
+                    } else {
+                        costPercentageInput.value = '';
+                    }
+                }
+        
+                function createImageRow() {
+                    const row = document.createElement('div');
+                    row.className = 'image-row';
+        
+                    const imgPreview = document.createElement('img');
+                    imgPreview.alt = 'Preview';
+        
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.accept = 'image/*';
+                    fileInput.addEventListener('change', (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                                imgPreview.src = reader.result;
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+        
+                    const textArea = document.createElement('textarea');
+                    textArea.placeholder = 'Describe the image';
+        
+                    row.appendChild(imgPreview);
+                    row.appendChild(fileInput);
+                    row.appendChild(textArea);
+        
+                    imageContainer.appendChild(row);
+                }
+        
+                function createActivityRow() {
+                    const row = document.createElement('div');
+                    row.className = 'activity-row';
+        
+                    const dateInput = document.createElement('input');
+                    dateInput.type = 'date';
+                    dateInput.name = 'activityDate';
+                    dateInput.placeholder = 'Activity Date';
+                    dateInput.required = true;
+
+                    const departmentInput = document.createElement('input');
+                    departmentInput.type = 'text';
+                    departmentInput.name = 'activityDepartment';
+                    departmentInput.placeholder = 'Department';
+                    departmentInput.required = true;
+        
+                    const descriptionInput = document.createElement('input');
+                    descriptionInput.type = 'text';
+                    descriptionInput.name = 'activityDescription';
+                    descriptionInput.placeholder = 'Activity Description';
+                    descriptionInput.required = true;
+        
+                    const statusSelect = document.createElement('select');
+                    statusSelect.name = 'activityStatus';
+                    statusSelect.required = true;
+        
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Select Status';
+                    statusSelect.appendChild(defaultOption);
+        
+                    ['Done', 'Pending', 'In Progress'].forEach(status => {
+                        const option = document.createElement('option');
+                        option.value = status;
+                        option.textContent = status;
+                        statusSelect.appendChild(option);
+                    });
+        
+                    row.appendChild(dateInput);
+                    row.appendChild(departmentInput);
+                    row.appendChild(descriptionInput);
+                    row.appendChild(statusSelect);
+        
+                    dailyActivityContainer.appendChild(row);
+                }
+        
+                totalSalesInput.addEventListener('input', () => {
+                    totalSalesInput.value = formatNumber(totalSalesInput.value);
+                    calculateCostPercentage();
+                });
+        
+                totalMarketlistInput.addEventListener('input', () => {
+                    totalMarketlistInput.value = formatNumber(totalMarketlistInput.value);
+                    calculateCostPercentage();
+                });
+        
+                addImageRowButton.addEventListener('click', createImageRow);
+                addActivityRowButton.addEventListener('click', createActivityRow);
+                printButton.addEventListener('click', () => window.print());
+            </script>
+        
+        </body>
+        </html>
+        
